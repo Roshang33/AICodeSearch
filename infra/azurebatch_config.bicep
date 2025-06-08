@@ -1,85 +1,63 @@
-@description('Name of the Azure Batch account')
-param batchAccountName string = 'mybatchaccount'
-
-@description('Name of the Azure Batch pool')
-param batchPoolName string = 'mybatchpool'
-
-@description('Location for the Batch account and pool')
 param location string = resourceGroup().location
+param storageAccountName string = 'batchstor${uniqueString(resourceGroup().id)}'
 
-@description('VM size to use in the pool')
-param vmSize string = 'STANDARD_D2_v3'
-
-@description('Maximum number of compute nodes in the pool')
-param maxNodes int = 10
-
-@description('Node agent SKU')
-param nodeAgentSkuId string = 'batch.node.ubuntu 20.04'
-
-@description('VM image reference')
-param imagePublisher string = 'Canonical'
-param imageOffer string = 'UbuntuServer'
-param imageSku string = '20_04-lts'
-param imageVersion string = 'latest'
-
-@description('Storage account for Batch auto storage')
-param storageAccountId string
+resource storageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = {
+  name: storageAccountName
+  location: location
+  sku: {
+    name: 'Standard_LRS'
+  }
+  kind: 'StorageV2'
+  properties: {
+    accessTier: 'Hot'
+  }
+}
 
 resource batchAccount 'Microsoft.Batch/batchAccounts@2023-05-01' = {
-  name: batchAccountName
+  name: 'batchaccount${uniqueString(resourceGroup().id)}'
   location: location
-  identity: {
-    type: 'SystemAssigned'
-  }
   properties: {
     autoStorage: {
-      storageAccountId: storageAccountId
+      storageAccountId: storageAccount.id
     }
   }
 }
 
 resource batchPool 'Microsoft.Batch/batchAccounts/pools@2023-05-01' = {
-  name: '${batchAccount.name}/${batchPoolName}'
+  name: '${batchAccount.name}/pythoncompute'
   properties: {
-    vmSize: vmSize
+    vmSize: 'STANDARD_D2_v3'
     deploymentConfiguration: {
       virtualMachineConfiguration: {
         imageReference: {
-          publisher: imagePublisher
-          offer: imageOffer
-          sku: imageSku
-          version: imageVersion
+          publisher: 'microsoft-azure-batch'
+          offer: 'ubuntu-server-container'
+          sku: '20-04-lts'
+          version: 'latest'
         }
-        nodeAgentSkuId: nodeAgentSkuId
+        nodeAgentSkuId: 'batch.node.ubuntu 20.04'
       }
     }
     scaleSettings: {
       autoScale: {
-        formula: '''
-startingNumberOfVMs = 0;
-maxNumberOfVMs = ${maxNodes};
-pendingTasks = $PendingTasks.GetSample(1);
-runningTasks = $RunningTasks.GetSample(1);
-activeTasks = pendingTasks + runningTasks;
-
-targetVMs = max(min(maxNumberOfVMs, activeTasks), startingNumberOfVMs);
-
-$TargetDedicatedNodes = targetVMs;
-$NodeDeallocationOption = taskcompletion;
-'''
+        formula: 'startingNumberOfVMs=0; maxNumberOfVMs=5; $TargetDedicatedNodes=0; $TargetLowPriorityNodes=0;'
         evaluationInterval: 'PT5M'
       }
     }
     startTask: {
-      commandLine: '/bin/bash -c "sudo apt update && sudo apt install -y python3-pip"'
+      commandLine: '/bin/bash -c "apt-get update && apt-get install -y python3-pip && pip3 install -r /mnt/batch/tasks/startup/wd/requirements.txt"'
       waitForSuccess: true
       userIdentity: {
         autoUser: {
-          scope: 'pool'
           elevationLevel: 'admin'
         }
       }
+      resourceFiles: []
     }
+    enableAutoScale: true
+    enableInterNodeCommunication: false
+    targetDedicatedNodes: 0
+    targetLowPriorityNodes: 0
   }
   dependsOn: [
     batchAccount
