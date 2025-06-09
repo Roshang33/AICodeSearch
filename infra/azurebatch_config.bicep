@@ -54,17 +54,10 @@ resource batchPool 'Microsoft.Batch/batchAccounts/pools@2023-05-01' = {
       waitForSuccess: true
       userIdentity: {
         autoUser: {
-          elevationLevel: 'admin'
+          elevationLevel: 'Admin'
         }
       }
       resourceFiles: []
     }
-    enableAutoScale: true
-    enableInterNodeCommunication: false
-    targetDedicatedNodes: 0
-    targetLowPriorityNodes: 0
   }
-  dependsOn: [
-    batchAccount
-  ]
 }
