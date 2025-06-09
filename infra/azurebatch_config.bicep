@@ -13,8 +13,13 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = {
   }
 }
 
+var fullName = 'btch${uniqueString(resourceGroup().id)}'
+
+// Optional: truncate if needed (e.g., use substring)
+var safeName = toLower(substring(fullName, 0, 17))
+
 resource batchAccount 'Microsoft.Batch/batchAccounts@2023-05-01' = {
-  name: 'batchaccount${uniqueString(resourceGroup().id)}'
+  name: safeName
   location: location
   properties: {
     autoStorage: {
