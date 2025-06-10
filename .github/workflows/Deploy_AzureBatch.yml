@@ -24,8 +24,8 @@ jobs:
         creds: ${{ secrets.AZURE_CREDS }}
 
     - name: Upload requirements.txt to Blob container
-        run: |
-          az storage blob upload \
+      run: |
+        az storage blob upload \
             --account-name batchprereqstore \
             --container-name store \
             --name requirements.txt \
