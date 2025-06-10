@@ -36,7 +36,9 @@ jobs:
       run: |
         az deployment group create \
           --resource-group AICodeSearch_RG \
-          --template-file infra/azurebatch_config.bicep
+          --template-file infra/azurebatch_config.bicep \
+          --parameters storageAccountName=batchprereqstore \
+                         storageContainerName=store
 
     - name: Logout
       run: az logout
