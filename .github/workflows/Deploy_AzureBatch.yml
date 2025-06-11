@@ -30,8 +30,8 @@ jobs:
             --container-name store \
             --name requirements.txt \
             --file dependencies/requirements.txt \
+            --overwrite true \
             --auth-mode login
-            --overwrite true
 
     - name: Deploy Bicep Template
       run: |
