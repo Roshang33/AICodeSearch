@@ -1,5 +1,5 @@
 param location string = resourceGroup().location
-param batchAccountName string = 'batch${uniqueString(resourceGroup().id)}'
+param batchAccountName string = 'btchh37gi2edjio3k'
 param storageAccountName string
 param storageContainerName string
 param requirementsFileName string = 'requirements.txt'
