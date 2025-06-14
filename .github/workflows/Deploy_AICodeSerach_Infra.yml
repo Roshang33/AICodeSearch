@@ -1,11 +1,11 @@
-name: Deploy Azure Batch with Bicep
+name: Deploy AICodeSerach infra with Bicep
 
 on:
   workflow_dispatch:  # Manual trigger
   push:
     paths:
       - 'infra/azurebatch_config.bicep'
-      - '.github/workflows/Deploy_AzureBatch.yml'
+      - '.github/workflows/Deploy_AICodeSerach_Infra.yml'
 
 permissions:
   contents: read  # No need for id-token permission
@@ -33,13 +33,20 @@ jobs:
             --overwrite true \
             --auth-mode login
 
-    - name: Deploy Bicep Template
+    - name: Deploy Azure Batch Bicep Template
       run: |
         az deployment group create \
           --resource-group AICodeSearch_RG \
           --template-file infra/azurebatch_config.bicep \
           --parameters @infra/parameters.json \
           --debug
+
+    - name: Deploy Azure Data factory Infra Bicep Template
+      run: |
+        az deployment group create \
+          --resource-group AICodeSearch_RG \
+          --template-file infra/adf-config.bicep \
+          --parameters dataFactoryName=AICodeSearch_ADF
 
     - name: Logout
       run: az logout
