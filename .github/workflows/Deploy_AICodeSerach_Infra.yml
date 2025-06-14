@@ -38,15 +38,14 @@ jobs:
         az deployment group create \
           --resource-group AICodeSearch_RG \
           --template-file infra/azurebatch_config.bicep \
-          --parameters @infra/parameters.json \
-          --debug
+          --parameters @infra/parameters.json
 
     - name: Deploy Azure Data factory Infra Bicep Template
       run: |
         az deployment group create \
           --resource-group AICodeSearch_RG \
           --template-file infra/adf-config.bicep \
-          --parameters dataFactoryName=AICodeSearch_ADF
+          --parameters dataFactoryName=AICodeSearch123-ADF
 
     - name: Logout
       run: az logout
