@@ -51,7 +51,7 @@ resource pool 'Microsoft.Batch/batchAccounts/pools@2023-05-01' = {
     }
     scaleSettings: {
       autoScale: {
-        formula: '$TargetDedicatedNodes = 0; $TargetLowPriorityNodes = 1;'
+        formula: 'startingNumberOfVMs=0; maxNumberOfVMs=5; $TargetDedicatedNodes=0; $TargetLowPriorityNodes=0;'
         evaluationInterval: 'PT5M'
       }
     }
