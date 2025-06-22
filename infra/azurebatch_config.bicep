@@ -56,7 +56,13 @@ resource pool 'Microsoft.Batch/batchAccounts/pools@2023-05-01' = {
       }
     }
     startTask: {
-      commandLine: '/bin/bash -c "sudo apt update && sudo apt install -y python3-pip && azcopy login --identity && azcopy copy \\"${requirementsUrl}\\" . && pip3 install -r requirements.txt"'
+      commandLine: '/bin/bash -c "sudo apt update && sudo apt install -y python3-pip && pip3 install -r requirements.txt"'
+      resourceFiles: [
+            {
+              httpUrl: '${requirementsUrl}'
+              filePath: 'requirements.txt'
+            }
+      ]
       waitForSuccess: true
       userIdentity: {
         autoUser: {
