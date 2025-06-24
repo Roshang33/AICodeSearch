@@ -4,5 +4,8 @@
   },
   "storageContainerName": {
     "value": "store"
+  },
+  "sas_token": {
+    "value": ""
   }
 }

@@ -13,10 +13,17 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      STORAGE_SAS_TOKEN: ${{ secrets.SAS_SECRET }}
 
     steps:
     - name: Checkout repo
       uses: actions/checkout@v3
+
+    - name: Inject SAS token into parameters.json
+        run: |
+          echo "Injecting SAS token into infra/parameters.json..."
+          sed -i 's|"sasToken": { "value": "" }|"sasToken": { "value": "'"${STORAGE_SAS_TOKEN}"'" }|' infra/parameters.json
 
     - name: Azure Login
       uses: azure/login@v1

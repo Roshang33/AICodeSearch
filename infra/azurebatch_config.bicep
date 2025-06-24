@@ -2,9 +2,10 @@ param location string = resourceGroup().location
 param batchAccountName string = 'btchh37gi2edjio3k'
 param storageAccountName string
 param storageContainerName string
+param sas_token string
 param requirementsFileName string = 'requirements.txt'
 
-var requirementsUrl = 'https://${storageAccountName}.blob.core.windows.net/${storageContainerName}/${requirementsFileName}'
+var requirementsUrl = 'https://${storageAccountName}.blob.core.windows.net/${storageContainerName}/${requirementsFileName}?${sas_token}'
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' existing = {
   name: storageAccountName
