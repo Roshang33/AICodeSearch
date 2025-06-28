@@ -36,7 +36,8 @@ def store_minimal_metadata(repos, conn_string, table_name="GitHubRepos"):
             "RowKey": str(repo["id"]),
             "name": repo["name"],
             "full_name": repo["full_name"],
-            "html_url": repo["html_url"]
+            "html_url": repo["html_url"],
+            "processing": "No"
         }
         try:
             table_client.upsert_entity(entity)

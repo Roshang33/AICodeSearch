@@ -1,0 +1,64 @@
+{
+  "name": "FetchGitHubReposPipeline",
+  "properties": {
+    "description": "Fetch list of GitHub repositories using a Batch custom activity",
+    "parameters": {
+      "githubToken": {
+        "type": "String",
+        "defaultValue": ""
+      },
+      "githubOrg": {
+        "type": "String",
+        "defaultValue": ""
+      },
+      "storageTableConnection": {
+        "type": "String",
+        "defaultValue": ""
+      }
+    },
+    "activities": [
+      {
+        "name": "FetchGitHubRepos",
+        "type": "Custom",
+        "linkedServiceName": {
+          "referenceName": "AzureBatchLinkedService",
+          "type": "LinkedServiceReference"
+        },
+        "typeProperties": {
+          "command": "python fetch_repos.py",
+          "resourceLinkedService": {
+            "referenceName": "AzureBlobStorageLinkedService",
+            "type": "LinkedServiceReference"
+          },
+          "referenceObjects": {
+            "resourceFiles": [
+              {
+                "filePath": "fetch_repos.py",
+                "httpUrl": "https://<your-storage-account>.blob.core.windows.net/scripts/fetch_repos.py?<sas-token>"
+              }
+            ]
+          },
+          "environmentVariables": [
+            {
+              "name": "GITHUB_TOKEN",
+              "value": "@pipeline().parameters.githubToken"
+            },
+            {
+              "name": "ORG_OR_USER",
+              "value": "@pipeline().parameters.githubOrg"
+            },
+            {
+              "name": "AZURE_TABLE_CONN",
+              "value": "@pipeline().parameters.storageTableConnection"
+            }
+          ]
+        },
+        "policy": {
+          "timeout": "01:00:00",
+          "retry": 1,
+          "retryIntervalInSeconds": 30
+        }
+      }
+    ]
+  }
+}

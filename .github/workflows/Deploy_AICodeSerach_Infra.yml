@@ -40,6 +40,16 @@ jobs:
             --overwrite true \
             --auth-mode login
 
+    - name: Upload fetch repos python file to Blob container
+      run: |
+        az storage blob upload \
+            --account-name batchprereqstore \
+            --container-name store \
+            --name fetch_repos.py \
+            --file fetch_repos.py \
+            --overwrite true \
+            --auth-mode login
+
     - name: Deploy Azure Batch Bicep Template
       run: |
         az deployment group create \
