@@ -26,7 +26,7 @@ def fetch_repos(github_token, org_or_user):
         page += 1
     return repos
 
-def store_minimal_metadata(repos, conn_string, table_name="GitHubRepos"):
+def store_minimal_metadata(repos, conn_string, table_name="repometadata"):
     service = TableServiceClient.from_connection_string(conn_string)
     table_client = service.create_table_if_not_exists(table_name=table_name)
 
