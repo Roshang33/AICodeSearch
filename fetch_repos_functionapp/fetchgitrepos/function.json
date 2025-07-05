@@ -4,13 +4,13 @@
       "authLevel": "function",
       "type": "httpTrigger",
       "direction": "in",
-      "name": "req",
+      "name": "Request",
       "methods": [ "post" ]
     },
     {
       "type": "http",
       "direction": "out",
-      "name": "res"
+      "name": "Response"
     }
   ],
   "scriptFile": "run.ps1"

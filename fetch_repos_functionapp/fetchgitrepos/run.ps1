@@ -5,10 +5,12 @@ $orgOrUser = $env:GITHUB_ORG
 $azureTableConn = $env:AZURE_TABLE_CONN
 
 function Write-Response($statusCode, $message) {
-    return @{
+    $Response = @{
         statusCode = $statusCode
         body = $message
     }
+
+    return $Response
 }
 
 # Import needed module if available
