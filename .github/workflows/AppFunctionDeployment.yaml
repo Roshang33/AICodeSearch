@@ -1,0 +1,50 @@
+name: Deploy to Azure Function App
+
+on:
+  workflow_dispatch:  # Manual trigger
+
+  push:
+    paths:
+      - 'fetch_repos_functionapp/**'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      AZURE_FUNCTIONAPP_NAME: fetchgitrepos     # e.g., githubrepofunction123
+      AZURE_RESOURCE_GROUP: GitHubRepoRG           # e.g., GitHubRepoRG
+      AZURE_REGION: eastus                          # e.g., eastus
+      FUNCTION_APP_FOLDER: fetch_repos_functionapp               # <-- your folder name
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+        creds: ${{ secrets.AZURE_CREDS }}
+
+      - name: Deploy to Azure Function App
+        uses: Azure/functions-action@v1
+        with:
+          app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
+          package: ${{ env.FUNCTION_APP_FOLDER }}
+          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+
+      - name: Set Azure Function App Environment Variables
+        run: |
+          az functionapp config appsettings set \
+            --name ${{ env.FUNCTION_APP_NAME }} \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --settings GITHUB_TOKEN=${{ secrets.PAT }} \
+                      AZURE_TABLE_CONN=${{ secrets.AZURE_STORAGE_CONN }} \
+                      GITHUB_ORG=Roshang33
+        env:
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          FUNCTION_APP_NAME: ${{ env.AZURE_FUNCTIONAPP_NAME }}
+          RESOURCE_GROUP: ${{ env.AZURE_RESOURCE_GROUP }}
+
+      - name: Deployment success
+        run: echo "✅ Successfully deployed to ${{ env.AZURE_FUNCTIONAPP_NAME }}"
