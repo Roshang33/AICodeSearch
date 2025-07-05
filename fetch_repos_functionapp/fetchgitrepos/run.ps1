@@ -1,5 +1,9 @@
 param($Request, $TriggerMetadata)
 
+try {
+    
+    $body = $Request.Body
+
 $githubToken = $env:GITHUB_TOKEN
 $orgOrUser = $env:GITHUB_ORG
 $azureTableConn = $env:AZURE_TABLE_CONN
@@ -32,31 +36,31 @@ Function Get-GitHubRepos {
 
         do {
             $url = "https://api.github.com/orgs/$OrgOrUser/repos?per_page=100&page=$page"
-            $response = Invoke-RestMethod -Uri $url -Headers $headers -Method Get -ErrorAction SilentlyContinue
+            $res = Invoke-RestMethod -Uri $url -Headers $headers -Method Get -ErrorAction SilentlyContinue
 
             # If org not found, try as user
-            if ($response -eq $null) {
+            if ($res -eq $null) {
                 $url = "https://api.github.com/users/$OrgOrUser/repos?per_page=100&page=$page"
-                $response = Invoke-RestMethod -Uri $url -Headers $headers -Method Get
+                $res = Invoke-RestMethod -Uri $url -Headers $headers -Method Get
             }
 
-            if ($response.Count -eq 0) { break }
+            if ($res.Count -eq 0) { break }
 
-            $repos += $response
+            $repos += $res
             $page++
         } while ($true)
 
         return $repos
     }
 
-function Store-ReposInTable {
+function Add-ReposInTable {
     param (
         [array]$Repos,
         [string]$ConnString
     )
 
     $tableClient = [Microsoft.Azure.Cosmos.Table.CloudStorageAccount]::Parse($ConnString).CreateCloudTableClient()
-    $table = $tableClient.GetTableReference($tableName)
+    $table = $tableClient.GetTableReference($body.tablename)
     $table.CreateIfNotExists() | Out-Null
 
     foreach ($repo in $Repos) {
@@ -74,10 +78,10 @@ function Store-ReposInTable {
     }
 }
 
-try {
+
    
     $repos = Get-GitHubRepos -Token $githubToken -OrgOrUser $orgOrUser
-    Store-ReposInTable -Repos $repos -ConnString $azureTableConn
+    Add-ReposInTable -Repos $repos -ConnString $azureTableConn
 
     Write-Response -statusCode 200 -message "Success"
 } catch {
