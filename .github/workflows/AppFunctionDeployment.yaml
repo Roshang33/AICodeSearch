@@ -24,7 +24,7 @@ jobs:
       - name: Azure Login
         uses: azure/login@v1
         with:
-        creds: ${{ secrets.AZURE_CREDS }}
+          creds: ${{ secrets.AZURE_CREDS }}
 
       - name: Deploy to Azure Function App
         uses: Azure/functions-action@v1
