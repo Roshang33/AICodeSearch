@@ -1,7 +1,7 @@
 param($Request, $TriggerMetadata)
 
 try {
-    
+
     $body = $Request.Body
 
 $githubToken = $env:GITHUB_TOKEN
@@ -72,9 +72,9 @@ function Add-ReposInTable {
             html_url     = $repo.html_url
         }
 
-        $tableEntity = New-AzTableRow -table $table -partitionKey $entity.PartitionKey -rowKey $entity.RowKey `
+        $tableEntity = Add-AzTableRow -table $table -partitionKey $entity.PartitionKey -rowKey $entity.RowKey `
             -property @{"name"=$entity.name; "full_name"=$entity.full_name; "html_url"=$entity.html_url}
-        $null = $table.Execute([Microsoft.Azure.Cosmos.Table.TableOperation]::InsertOrReplace($tableEntity))
+        #$null = $table.Execute([Microsoft.Azure.Cosmos.Table.TableOperation]::InsertOrReplace($tableEntity))
     }
 }
 
