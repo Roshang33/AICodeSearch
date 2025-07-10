@@ -1,0 +1,14 @@
+{
+  "profiles": {
+    "fetchgitrepo": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7118"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker",
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
+      "httpPort": 34334,
+      "useSSL": false
+    }
+  }
+}
