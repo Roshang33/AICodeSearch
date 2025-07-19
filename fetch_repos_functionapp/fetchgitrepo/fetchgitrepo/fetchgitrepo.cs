@@ -12,6 +12,7 @@ using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System;
+using Microsoft.WindowsAzure.Storage.Queue;
 
 namespace fetchgitrepo
 {
@@ -30,9 +31,9 @@ namespace fetchgitrepo
 
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             dynamic data = JsonConvert.DeserializeObject(requestBody);
-            string tableName = data?.tablename;
+            string queueName = data?.queueName;
 
-            if (string.IsNullOrEmpty(githubToken) || string.IsNullOrEmpty(githubOrg) || string.IsNullOrEmpty(azureTableConn) || string.IsNullOrEmpty(tableName))
+            if (string.IsNullOrEmpty(githubToken) || string.IsNullOrEmpty(githubOrg) || string.IsNullOrEmpty(azureTableConn) || string.IsNullOrEmpty(queueName))
             {
                 return new BadRequestObjectResult("Missing required parameters or environment variables.");
             }
@@ -40,7 +41,7 @@ namespace fetchgitrepo
             try
             {
                 var repos = await GetGitHubRepos(githubToken, githubOrg);
-                await WriteToTable(azureTableConn, tableName, repos);
+                await WriteToQueueAsync(azureTableConn, queueName, repos);
                 return new OkObjectResult("Success");
             }
             catch (Exception ex)
@@ -85,27 +86,49 @@ namespace fetchgitrepo
             return repos;
         }
 
-        private static async Task WriteToTable(string connString, string tableName, List<dynamic> repos)
+        //private static async Task WriteToTable(string connString, string tableName, List<dynamic> repos)
+        //{
+        //    CloudStorageAccount storageAccount = CloudStorageAccount.Parse(connString);
+        //    CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
+        //    CloudTable table = tableClient.GetTableReference(tableName);
+        //    await table.CreateIfNotExistsAsync();
+
+        //    foreach (var repo in repos)
+        //    {
+        //        var entity = new DynamicTableEntity("GitHub", repo.id.ToString())
+        //        {
+        //            Properties =
+        //            {
+        //                { "name", new EntityProperty((string)repo.name) },
+        //                { "full_name", new EntityProperty((string)repo.full_name) },
+        //                { "html_url", new EntityProperty((string)repo.html_url) }
+        //            }
+        //        };
+
+        //        var insertOp = TableOperation.InsertOrReplace(entity);
+        //        await table.ExecuteAsync(insertOp);
+        //    }
+        //}
+
+        private static async Task WriteToQueueAsync(string connString, string queueName, List<dynamic> repos)
         {
             CloudStorageAccount storageAccount = CloudStorageAccount.Parse(connString);
-            CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
-            CloudTable table = tableClient.GetTableReference(tableName);
-            await table.CreateIfNotExistsAsync();
+            CloudQueueClient queueClient = storageAccount.CreateCloudQueueClient();
+            CloudQueue queue = queueClient.GetQueueReference(queueName);
+            await queue.CreateIfNotExistsAsync();
 
             foreach (var repo in repos)
             {
-                var entity = new DynamicTableEntity("GitHub", repo.id.ToString())
+                var messageObject = new
                 {
-                    Properties =
-                    {
-                        { "name", new EntityProperty((string)repo.name) },
-                        { "full_name", new EntityProperty((string)repo.full_name) },
-                        { "html_url", new EntityProperty((string)repo.html_url) }
-                    }
+                    name = (string)repo.name,
+                    full_name = (string)repo.full_name,
+                    html_url = (string)repo.html_url
                 };
 
-                var insertOp = TableOperation.InsertOrReplace(entity);
-                await table.ExecuteAsync(insertOp);
+                string messagePayload = JsonConvert.SerializeObject(messageObject);
+                CloudQueueMessage message = new CloudQueueMessage(messagePayload);
+                await queue.AddMessageAsync(message);
             }
         }
     }
