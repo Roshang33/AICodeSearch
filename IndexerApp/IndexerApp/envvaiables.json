@@ -1,0 +1,12 @@
+{
+  "SEARCH_ENDPOINT": "https://<your-search>.search.windows.net",
+  "SEARCH_API_KEY": "<your-admin-key>",
+  "AZURE_STORAGE_CONNECTION_STRING": "<your-storage-connection-string>",
+  "OPENAI_API_KEY": "<your-openai-api-key>",
+  "AZURE_OPENAI_ENDPOINT": "<your-azure-openai-endpoint>",
+  "AZURE_OPENAI_KEY": "<your-azure-openai-key>",
+  "INDEX_NAME": "code-index",
+  "MAX_PARALLELISM": 6,
+  "BATCH_SIZE": 64,
+  "CHUNK_SIZE": 3000
+}
